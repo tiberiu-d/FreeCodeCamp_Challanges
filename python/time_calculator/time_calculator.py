@@ -1,61 +1,46 @@
-def add_minutes(start_minutes, min_to_add):
-    extra_hour = False
-    new_minutes = start_minutes + min_to_add
-    if new_minutes > 60:
-        new_minutes -= 60
-        extra_hour = True
-    return new_minutes, extra_hour
-
-
-def add_hours(start_hour, hrs_to_add, tod):
-    extra_day = False
-    new_tod = tod
-    new_hours = start_hour + hrs_to_add
-
-    if new_hours == 24:
-        new_hours -= 12
-        extra_day = True
-
-    if new_hours > 12:
-        if tod == "AM":
-            new_tod = "PM"
-        else:
-            new_tod = "AM"
-
-    return new_hours, extra_day, new_tod
-
-
-def pretty_print(hours, minutes, tod):
+def pretty_print(hours, minutes, tod, extra):
     if minutes < 10:
         new_minutes = "0" + str(minutes)
     else:
         new_minutes = str(minutes)
 
-    return f"{hours}:{new_minutes} {tod}"
+    if extra == "":
+        return f"{hours}:{new_minutes} {tod}"
+    else:
+        return f"{hours}:{new_minutes} {tod} {extra}"
 
 
 def add_time(start, duration):
-    start_hour = int(start.split(":")[0])
-    start_minute = int(start.split(":")[1].split(" ")[0])
-    start_tod = start.split(":")[1].split(" ")[1]
+    start_HH = int(start.split(":")[0])
+    start_MI = int(start.split(":")[1].split(" ")[0])
+    start_TOD = start.split(":")[1].split(" ")[1]
 
-    duration_hour = int(duration.split(":")[0])
-    duration_minute = int(duration.split(":")[1])
+    duration_HH = int(duration.split(":")[0])
+    duration_MI = int(duration.split(":")[1])
 
-    # print(f"{start} + {duration}")
-    # print(f" minute : {add_minutes(start_minute, duration_minute)}")
-    # print(f" ore : {add_hours(start_hour, duration_hour)}")
+    # let's add the minutes/hours and set everything up
+    result_extra = ""
+    result_HH = 0
+    result_MI = start_MI + duration_MI
+    result_HH = start_HH + duration_HH
 
-    result_hours = add_hours(start_hour, duration_hour, start_tod)[0]
-    # result_hours_extra = add_hours(start_hour, duration_hour, start_tod)[1]
-    result_hours_tod = add_hours(start_hour, duration_hour, start_tod)[2]
-    result_minutes = add_minutes(start_minute, duration_minute)[0]
-    result_minutes_extra = add_minutes(start_minute, duration_minute)[1]
+    # new minutes are greater than 1h?
+    if result_MI >= 60:
+        result_MI -= 60
+        result_HH += 1
 
-    if result_minutes_extra == True:
-        result_hours += 1
+    # let's account for AM/PM
+    if result_HH >= 12:
+        if start_TOD == "AM":
+            start_TOD = "PM"
+        else:
+            start_TOD = "AM"
+            result_extra = "(next day)"
 
-    if result_hours > 12:
-        result_hours -= 12
+    if result_HH > 12:
+        result_HH -= 12
 
-    return pretty_print(result_hours, result_minutes, result_hours_tod)
+    return pretty_print(result_HH, result_MI, start_TOD, result_extra)
+
+
+# print(add_time("2:59 AM", "24:00"))
